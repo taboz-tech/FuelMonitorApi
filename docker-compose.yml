@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  fuel-monitor-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fuel-monitor-api
+    ports:
+      - "4174:4174"
+    environment:
+      # SSH Tunnel Configuration
+      SSH_HOST: 41.191.232.15
+      SSH_USERNAME: sa
+      SSH_PASSWORD: s3rv3r5mx$
+      REMOTE_BIND_HOST: 127.0.0.1
+      REMOTE_BIND_PORT: 5437
+      
+      # Database Configuration  
+      DB_NAME: sensorsdb
+      DB_USER: sa
+      DB_PASSWORD: s3rv3r5mxdb
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      
+      # API Configuration
+      JWT_SECRET: c8f2e1e8d65f6fa3eff0d06ca3377dcd6a6918284f522ff70eba7eabea997994
+      PORT: 4174
+      GIN_MODE: release
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4174/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
