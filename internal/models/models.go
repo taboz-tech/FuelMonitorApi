@@ -210,3 +210,119 @@ func (u *User) ToResponse() UserResponse {
 		CreatedAt: u.CreatedAt,
 	}
 }
+
+// Cumulative readings request/response models
+type CumulativeReadingsRequest struct {
+	Date string `json:"date"`
+}
+
+type CumulativeReadingsResponse struct {
+	Date        string                 `json:"date"`
+	ProcessedAt string                 `json:"processedAt"`
+	User        UserInfo               `json:"user"`
+	Sites       []CumulativeSiteResult `json:"sites"`
+	Summary     CumulativeSummary      `json:"summary"`
+}
+
+type UserInfo struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}
+
+type CumulativeSiteResult struct {
+	SiteID              int       `json:"siteId"`
+	SiteName            string    `json:"siteName"`
+	DeviceID            string    `json:"deviceId"`
+	FuelConsumed        float64   `json:"fuelConsumed"`
+	FuelTopped          float64   `json:"fuelTopped"`
+	FuelConsumedPercent float64   `json:"fuelConsumedPercent"`
+	FuelToppedPercent   float64   `json:"fuelToppedPercent"`
+	GeneratorHours      float64   `json:"generatorHours"`
+	ZesaHours           float64   `json:"zesaHours"`
+	OfflineHours        float64   `json:"offlineHours"`
+	Status              string    `json:"status"` // "CREATED", "UPDATED", "ERROR"
+	Error               string    `json:"error,omitempty"`
+	CalculatedAt        time.Time `json:"calculatedAt"`
+}
+
+type CumulativeSummary struct {
+	TotalSites          int     `json:"totalSites"`
+	ProcessedSites      int     `json:"processedSites"`
+	ErrorSites          int     `json:"errorSites"`
+	TotalFuelConsumed   float64 `json:"totalFuelConsumed"`
+	TotalFuelTopped     float64 `json:"totalFuelTopped"`
+	TotalGeneratorHours float64 `json:"totalGeneratorHours"`
+	TotalZesaHours      float64 `json:"totalZesaHours"`
+	TotalOfflineHours   float64 `json:"totalOfflineHours"`
+}
+
+// Database models
+type CumulativeReading struct {
+	ID                    int       `json:"id"`
+	SiteID                int       `json:"siteId"`
+	DeviceID              string    `json:"deviceId"`
+	Date                  string    `json:"date"`
+	TotalFuelConsumed     string    `json:"totalFuelConsumed"`
+	TotalFuelTopped       string    `json:"totalFuelTopped"`
+	FuelConsumedPercent   string    `json:"fuelConsumedPercent"`
+	FuelToppedPercent     string    `json:"fuelToppedPercent"`
+	TotalGeneratorRuntime string    `json:"totalGeneratorRuntime"`
+	TotalZesaRuntime      string    `json:"totalZesaRuntime"`
+	TotalOfflineTime      string    `json:"totalOfflineTime"`
+	CalculatedAt          time.Time `json:"calculatedAt"`
+	CreatedAt             time.Time `json:"createdAt"`
+}
+
+// Calculation result models
+type FuelMetrics struct {
+	TotalFuelConsumed   float64
+	TotalFuelTopped     float64
+	FuelConsumedPercent float64
+	FuelToppedPercent   float64
+}
+
+type PowerMetrics struct {
+	TotalGeneratorRuntime float64
+	TotalZesaRuntime      float64
+	TotalOfflineTime      float64
+}
+
+// CumulativeReadingsRangeResponse represents the response for date range queries
+type CumulativeReadingsRangeResponse struct {
+	Sites   []CumulativeSiteRangeResult `json:"sites"`
+	Summary CumulativeRangeSummary      `json:"summary"`
+}
+
+// CumulativeSiteRangeResult represents aggregated data for a single site over a date range
+type CumulativeSiteRangeResult struct {
+	SiteID              int       `json:"siteId"`
+	SiteName            string    `json:"siteName"`
+	DeviceID            string    `json:"deviceId"`
+	TotalFuelConsumed   float64   `json:"totalFuelConsumed"`
+	TotalFuelTopped     float64   `json:"totalFuelTopped"`
+	TotalGeneratorHours float64   `json:"totalGeneratorHours"`
+	TotalZesaHours      float64   `json:"totalZesaHours"`
+	TotalOfflineHours   float64   `json:"totalOfflineHours"`
+	ReadingDays         int       `json:"readingDays"`
+	DateRange           DateRange `json:"dateRange"`
+}
+
+// CumulativeRangeSummary represents summary statistics for a date range
+type CumulativeRangeSummary struct {
+	DateRange           DateRange `json:"dateRange"`
+	TotalSites          int       `json:"totalSites"`
+	TotalFuelConsumed   float64   `json:"totalFuelConsumed"`
+	TotalFuelTopped     float64   `json:"totalFuelTopped"`
+	TotalGeneratorHours float64   `json:"totalGeneratorHours"`
+	TotalZesaHours      float64   `json:"totalZesaHours"`
+	TotalOfflineHours   float64   `json:"totalOfflineHours"`
+	AverageFuelPerSite  float64   `json:"averageFuelPerSite"`
+	DaysIncluded        int       `json:"daysIncluded"`
+}
+
+// DateRange represents a date range with start and end dates
+type DateRange struct {
+	Start   string `json:"start"`
+	End     string `json:"end"`
+	IsRange bool   `json:"isRange,omitempty"`
+}

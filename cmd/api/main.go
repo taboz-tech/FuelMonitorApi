@@ -126,14 +126,15 @@ func setupRouter(cfg *config.Config, db *database.DB) *gin.Engine {
 	userHandler := handlers.NewUserHandler(db)
 	sitesHandler := handlers.NewSitesHandler(db)
 	dashboardHandler := handlers.NewDashboardHandler(db)
+	cumulativeHandler := handlers.NewCumulativeHandler(db)
 
 	// Routes
-	setupRoutes(router, authHandler, userHandler, sitesHandler, dashboardHandler)
+	setupRoutes(router, authHandler, userHandler, sitesHandler, dashboardHandler, cumulativeHandler)
 
 	return router
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, sitesHandler *handlers.SitesHandler, dashboardHandler *handlers.DashboardHandler) {
+func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, sitesHandler *handlers.SitesHandler, dashboardHandler *handlers.DashboardHandler, cumulativeHandler *handlers.CumulativeHandler) {
 	// Health check
 	router.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -152,6 +153,12 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 
 	// Dashboard route (authenticated users)
 	router.GET("/api/dashboard", middleware.AuthRequired(authHandler.Config.JWT.Secret), dashboardHandler.GetDashboard)
+
+	// Cumulative readings route (authenticated users) - ADD THIS LINE
+	router.POST("/api/cumulative-readings", middleware.AuthRequired(authHandler.Config.JWT.Secret), cumulativeHandler.GetCumulativeReadings)
+
+	// Register the new GET endpoint for cumulative readings by date range
+	router.GET("/api/cumulative-readings", middleware.AuthRequired(authHandler.Config.JWT.Secret), cumulativeHandler.GetCumulativeReadingsByDateRange)
 
 	// Sites routes (authenticated users)
 	sites := router.Group("/api/sites")
